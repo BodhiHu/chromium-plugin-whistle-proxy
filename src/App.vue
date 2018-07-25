@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <h1>WHISTLE 规则管理</h1>
+        <h1>WHISTLE 规则列表</h1>
         <div class="content">
             <div class="loading" v-if="!hasInit">规则加载中...</div>
             <div class="failed" v-if="hasInit && !rules">
@@ -12,14 +12,38 @@
                     <a href="javascript:void(0);" class="btn" @click.stop.prevent="reload">重新加载</a>
                 </div>
             </div>
-            <ul v-if="rules">
-                <li v-for="(item, index) in rules" :key="index">
+            <div v-if="rules" class="list-container">
+                <div v-if="hasInit" class="list-item">
                     <div class="btn-container">
-                        <div class="btn" :class="{enabled: item.selected}" @click.stop.prevent="change(item)"><span></span></div>
+                        <div v-show="defaultEnabled" class="btn enabled" @click.stop.prevent="changeDefault"><span></span></div>
+                        <div v-show="!defaultEnabled" class="btn" @click.stop.prevent="changeDefault"><span></span></div>
+                    </div>
+                    <div class="name">默认规则</div>
+                </div>
+                <div class="list-item" v-for="(item, index) in rules" :key="index">
+                    <div class="btn-container">
+                        <div v-show="item.selected" class="btn enabled" @click.stop.prevent="change(item, index)"><span></span></div>
+                        <div v-show="!item.selected" class="btn" @click.stop.prevent="change(item, index)"><span></span></div>
                     </div>
                     <div class="name">{{item.name}}</div>
-                </li>
-            </ul>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="server-info">
+                <h1>代理信息</h1>
+                <div class="row">
+                    <div class="title">Port</div>
+                    <div class="info">{{server.port}}</div>
+                </div>
+                <div class="row">
+                    <div class="title">IPv4</div>
+                    <div class="info" v-html="server.ipv4.join('</br>')"></div>
+                </div>
+                <div class="row">
+                    <div class="title">IPv6</div>
+                    <div class="info" v-html="server.ipv6.join('</br>')"></div>
+                </div>
+            </div>
         </div>
         <div class="tips">
             <a v-bind:href="apiUrl" target="_blank">更多设置</a>
@@ -36,6 +60,10 @@
         data() {
             return {
                 apiUrl: Storage.get('apiUrl') || 'http://127.0.0.1:8899/',
+                server: {},
+                defaultEnabled: false,
+                defaultRules: '',
+                lastRowId: '',
                 hasInit: false,
                 clientId: '',
                 rules: null
@@ -47,29 +75,34 @@
             }
         },
         methods: {
-            init(reset) {
+            async getInitInfo() {
+                try {
+                    let res = await $http.get(`${this.url}/cgi-bin/init?_=${new Date().getTime()}`);
+                    this.clientId = res.clientId;
+                    this.lastRowId = res.lastDataId;
+                    this.rules = res.rules.list;
+                    this.defaultEnabled = !res.rules.defaultRulesIsDisabled;
+                    this.defaultRules = res.rules.defaultRules;
+                    this.server = res.server;
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+            async init(reset) {
                 if (reset) {
                     this.hasInit = false;
                 }
-                $http.get(`${this.url}/cgi-bin/init?_=${new Date().getTime()}`).then(res => {
-                    this.hasInit = true;
-                    this.clientId = res.clientId;
-                    this.rules = res.rules.list;
-                    console.log(this.rules);
-                }).catch(err => {
-                    this.hasInit = true;
-                });
-            },
-            options(url) {
-                $http.options(url);
+                await this.getInitInfo();
+                this.hasInit = true;
             },
             reload() {
                 Storage.set('apiUrl', this.apiUrl);
                 this.init(true);
             },
-            enable(item) {
-                let url = `${this.url}/cgi-bin/rules/select`;
-                $http.post(url, {
+            async setEnable(item, enable) {
+                let url = enable ? `${this.url}/cgi-bin/rules/select` : `${this.url}/cgi-bin/rules/unselect`;
+                await $http.post(url, {
                     clientId: this.clientId,
                     name: item.name,
                     value: item.data,
@@ -79,28 +112,26 @@
                     icon: 'checkbox',
                     hide: false,
                     changed: false
-                }).finally(_ => {
-                    this.init();
                 });
-            },
-            disable(item) {
-                let url = `${this.url}/cgi-bin/rules/unselect`;
-                $http.post(url, {
-                    clientId: this.clientId,
-                    name: item.name,
-                    value: item.data,
-                    selected: true,
-                    active: true,
-                    key: `w-reactkey-${item.index + 2}`,
-                    icon: 'checkbox',
-                    hide: false,
-                    changed: false
-                }).finally(_ => {
-                    this.init();
-                });
+                this.init();
             },
             change(item) {
-                item.selected ? this.disable(item) : this.enable(item);
+                this.setEnable(item, !item.selected);
+            },
+            async changeDefault() {
+                let url = this.defaultEnabled ? `${this.url}/cgi-bin/rules/disable-default` : `${this.url}/cgi-bin/rules/enable-default`;
+                await $http.post(url, {
+                    clientId: this.clientId,
+                    name: 'Default',
+                    fixed: true,
+                    value: this.defaultRules,
+                    selected: true,
+                    isDefault: true,
+                    active: true,
+                    key: 'w-reactkey-1',
+                    icon: 'checkbox'
+                });
+                this.init();
             }
         },
         mounted() {
@@ -128,7 +159,28 @@
         }
     }
 
+    .clear {
+        clear: both;
+        float: none;
+    }
+
     .content {
+        .server-info {
+            margin-bottom: 10px;
+            .row {
+                min-height: 20px;
+                line-height: 20px;
+                .title {
+                    float: left;
+                    width: 30px;
+                    font-weight: bold;
+                }
+                .info {
+                    margin-left: 40px;
+                    color: #6b92fa;
+                }
+            }
+        }
         .failed {
             .tips {
                 border-bottom: 1px solid #efefef;
@@ -171,47 +223,44 @@
             color: #666;
             font-size: 14px;
         }
-        ul, li {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            line-height: 30px;
-            border-bottom: 1px dashed #cccccc;
-            &:hover {
-                background: #efefef;
-            }
-            .btn-container {
-                float: right;
-                width: 40px;
-                .btn {
-                    background: rgb(255, 73, 73);
+        .list-container {
+            margin-bottom: 10px;
+            .list-item {
+                line-height: 30px;
+                border-bottom: 1px dashed #cccccc;
+                .btn-container {
+                    float: right;
                     width: 40px;
-                    height: 20px;
-                    margin: 5px 0;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    span {
-                        float: left;
-                        width: 16px;
-                        height: 16px;
-                        background: #ffffff;
-                        border-radius: 8px;
-                        margin: 2px;
-                    }
-                    &.enabled {
-                        background: rgb(19, 206, 102);
+                    .btn {
+                        background: rgb(255, 73, 73);
+                        width: 40px;
+                        height: 20px;
+                        margin: 5px 0;
+                        border-radius: 10px;
+                        cursor: pointer;
                         span {
-                            float: right;
+                            float: left;
+                            width: 16px;
+                            height: 16px;
+                            background: #ffffff;
+                            border-radius: 8px;
+                            margin: 2px;
+                            transform: translate3d(0, 0, 0);
+                        }
+                        &.enabled {
+                            background: rgb(19, 206, 102);
+                            span {
+                                transform: translate3d(20px, 0, 0);
+                            }
                         }
                     }
                 }
-            }
-            .name {
-                margin-right: 60px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                .name {
+                    margin-right: 60px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
             }
         }
     }
