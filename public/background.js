@@ -63,7 +63,7 @@ window.$storage = {
             new URL(value);
             localStorage.setItem('whistle-api-url', value);
         } catch (e) {
-            
+
         }
     },
     removeApiUrl() {
@@ -105,11 +105,11 @@ window.$proxy = {
             chrome.proxy.settings.get({incognito: false}, config => {
                 let url = new URL($storage.getApiUrl());
                 let hasEnableWhistleProxy;
-                if (config.value.mode === 'system') {
-                    hasEnableWhistleProxy = false;
-                } else {
+                try {
                     let proxyConfig = config.value.rules.proxyForHttp || config.value.rules.proxyForHttps || config.value.rules.proxyForFtp;
                     hasEnableWhistleProxy = proxyConfig.host === url.hostname && proxyConfig.port === parseInt(url.port, 10) && proxyConfig.scheme === url.protocol.replace(/:$/, '');
+                } catch (e) {
+                    hasEnableWhistleProxy = false;
                 }
                 hasEnableWhistleProxy ? $utils.setTitle(`启用WHISTLE代理：是\n代理地址：${$storage.getApiUrl()}`) : $utils.setTitle('启用WHISTLE代理：否');
                 chrome.browserAction.setIcon({
