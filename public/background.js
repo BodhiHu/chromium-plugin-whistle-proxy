@@ -53,3 +53,83 @@ window.$http = {
         });
     }
 };
+
+window.$storage = {
+    getApiUrl() {
+        return localStorage.getItem('whistle-api-url');
+    },
+    setApiUrl(value) {
+        try {
+            new URL(value);
+            localStorage.setItem('whistle-api-url', value);
+        } catch (e) {
+            
+        }
+    },
+    removeApiUrl() {
+        localStorage.removeItem('whistle-api-url');
+    }
+};
+
+window.$proxy = {
+    enable() {
+        return new Promise(resolve => {
+            url = new URL($storage.getApiUrl());
+            let proxyObj = {
+                scheme: url.protocol.replace(/:$/, ''),
+                host: url.hostname,
+                port: parseInt(url.port, 10)
+            };
+            let proxyConfig = {
+                mode: 'fixed_servers',
+                rules: {
+                    proxyForFtp: proxyObj,
+                    proxyForHttp: proxyObj,
+                    proxyForHttps: proxyObj
+                }
+            };
+            chrome.proxy.settings.set({value: proxyConfig, scope: 'regular'}, function () {
+                resolve();
+            });
+        });
+    },
+    disable() {
+        return new Promise(resolve => {
+            chrome.proxy.settings.set({value: {mode: 'system'}, scope: 'regular'}, function () {
+                resolve();
+            })
+        });
+    },
+    get() {
+        return new Promise(resolve => {
+            chrome.proxy.settings.get({incognito: false}, config => {
+                let url = new URL($storage.getApiUrl());
+                let hasEnableWhistleProxy;
+                if (config.value.mode === 'system') {
+                    hasEnableWhistleProxy = false;
+                } else {
+                    let proxyConfig = config.value.rules.proxyForHttp || config.value.rules.proxyForHttps || config.value.rules.proxyForFtp;
+                    hasEnableWhistleProxy = proxyConfig.host === url.hostname && proxyConfig.port === parseInt(url.port, 10) && proxyConfig.scheme === url.protocol.replace(/:$/, '');
+                }
+                hasEnableWhistleProxy ? $utils.setTitle(`启用WHISTLE代理：是\n代理地址：${$storage.getApiUrl()}`) : $utils.setTitle('启用WHISTLE代理：否');
+                chrome.browserAction.setIcon({
+                    path: hasEnableWhistleProxy ? 'icon.png' : 'icon_disabled.png'
+                });
+                resolve(hasEnableWhistleProxy);
+            });
+        });
+    }
+};
+window.$utils = {
+    setTitle(title) {
+        chrome.browserAction.setTitle({
+            title: `Whistle 规则管理\n=======================\n${title}`
+        });
+    }
+};
+(_ => {
+    if (!$storage.getApiUrl()) {
+        $storage.setApiUrl('http://127.0.0.1:8899/');
+    }
+    $proxy.get();
+})();
