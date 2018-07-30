@@ -1,8 +1,8 @@
 {
-  "name": "whistle rules plugin By Nick",
-  "version": "1.4",
+  "name": "__MSG_extName__",
+  "version": "1.5",
   "manifest_version": 2,
-  "description": "whistle 代理规则管理非官方插件",
+  "description": "__MSG_extDescription__",
   "icons": {
     "128": "icon.png"
   },
@@ -13,10 +13,11 @@
     "persistent": true
   },
   "browser_action": {
-    "default_title": "Whistle 规则管理",
+    "default_title": "__MSG_titleAction__",
     "default_icon": "icon.png",
     "default_popup": "index.html"
   },
+  "default_locale": "zh_CN",
   "permissions": [
     "proxy",
     "storage"

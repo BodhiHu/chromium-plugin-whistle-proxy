@@ -1,26 +1,26 @@
 <template>
     <div id="app">
         <el-card v-if="!hasInit">
-            规则加载中...
+            {{messages.loading}}
         </el-card>
         <el-card class="failed" v-if="hasInit && !rules">
-            <div class="tips">加载失败，请确认whistle已经启动且下面的地址是正确的（若不正确，输入正确的地址）</div>
+            <div class="tips">{{messages.tipFailed}}</div>
             <div class="input">
                 <el-input v-model="apiUrl" size="mini"></el-input>
             </div>
             <div class="btns">
-                <el-button size="mini" type="primary" icon="el-icon-refresh" @click.stop.prevent="reload">保存并重新加载</el-button>
+                <el-button size="mini" type="primary" icon="el-icon-refresh" @click.stop.prevent="reload">{{messages.btnSave}}</el-button>
             </div>
         </el-card>
         <div v-if="rules">
             <el-card shadow="never">
-                <div slot="header"><span>WHISTLE规则管理</span></div>
+                <div slot="header"><span>{{messages.title1}}</span></div>
                 <div class="list">
                     <div class="item" :class="{active: defaultEnabled}">
                         <div class="operation">
                             <el-switch v-model="defaultEnabled" @change="changeDefault"></el-switch>
                         </div>
-                        <div class="name">默认规则</div>
+                        <div class="name">{{messages.defaultRule}}</div>
                     </div>
                     <div class="item" v-for="(item, index) in rules" :key="index" :class="{active: item.selected}">
                         <div class="operation">
@@ -31,10 +31,10 @@
                 </div>
             </el-card>
             <el-card shadow="never">
-                <div slot="header"><span>WHISTLE代理信息</span></div>
+                <div slot="header"><span>{{messages.title2}}</span></div>
                 <div class="content">
                     <el-form label-width="50px" size="mini">
-                        <el-form-item label="启用">
+                        <el-form-item :label="messages.enable">
                             <el-switch v-model="proxyEnabled" @change="setProxyStatus"></el-switch>
                         </el-form-item>
                         <el-form-item label="Port">{{server.port}}</el-form-item>
@@ -48,7 +48,7 @@
                 </div>
             </el-card>
             <el-card>
-                <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">更多设置 <i class="el-icon-d-arrow-right"></i></a>
+                <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">{{messages.moreSettings}} <i class="el-icon-d-arrow-right"></i></a>
             </el-card>
         </div>
     </div>
@@ -57,6 +57,7 @@
     const $http = chrome.extension.getBackgroundPage().$http;
     const $storage = chrome.extension.getBackgroundPage().$storage;
     const $proxy = chrome.extension.getBackgroundPage().$proxy;
+    const $i18n = chrome.i18n.getMessage;
 
     export default {
         name: 'app',
@@ -70,7 +71,17 @@
                 lastRowId: '',
                 hasInit: false,
                 clientId: '',
-                rules: null
+                rules: null,
+                messages: {
+                    loading: $i18n('loading'),
+                    tipFailed: $i18n('tipFailed'),
+                    btnSave: $i18n('btnSave'),
+                    title1: $i18n('title1'),
+                    title2: $i18n('title2'),
+                    defaultRule: $i18n('defaultRule'),
+                    enable: $i18n('enable'),
+                    moreSettings: $i18n('moreSettings')
+                }
             };
         },
         computed: {

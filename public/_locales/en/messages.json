@@ -1,0 +1,58 @@
+{
+  "extName": {
+    "message": "Whistle plugin By Nick",
+    "description": "标题"
+  },
+  "extDescription": {
+    "message": "Whistle proxy management unofficial plugin",
+    "description": "描述"
+  },
+  "loading": {
+    "message": "Rules is loading...",
+    "description": "加载中"
+  },
+  "tipFailed": {
+    "message": "Load failed, please make sure that whistle is running and the following url is correct (if not, please input the correct url).",
+    "description": "规则加载失败提示"
+  },
+  "btnSave": {
+    "message": "Save and reload",
+    "description": "保存按钮"
+  },
+  "title1": {
+    "message": "WHISTLE Rules Management",
+    "description": "页面小标题"
+  },
+  "title2": {
+    "message": "WHISTLE Proxy Information",
+    "description": "页面小标题"
+  },
+  "titleBackground": {
+    "message": "Whistle rules management\n=======================\n",
+    "description": "图标显示标题"
+  },
+  "titleAction": {
+    "message": "Whistle plugin",
+    "description": "图标显示标题"
+  },
+  "defaultRule": {
+    "message": "Default Rule",
+    "description": "默认规则"
+  },
+  "enable": {
+    "message": "Enable",
+    "description": "启用"
+  },
+  "moreSettings": {
+    "message": "More Settings",
+    "description": "更多设置"
+  },
+  "enableTipBackground": {
+    "message": "Is Whistle Proxy Enable: Yes\nProxy Url:",
+    "description": ""
+  },
+  "disableTipBackground": {
+    "message": "Is Whistle Proxy Enable: No",
+    "description": ""
+  }
+}

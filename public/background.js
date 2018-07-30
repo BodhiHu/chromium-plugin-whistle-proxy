@@ -111,7 +111,7 @@ window.$proxy = {
                 } catch (e) {
                     hasEnableWhistleProxy = false;
                 }
-                hasEnableWhistleProxy ? $utils.setTitle(`启用WHISTLE代理：是\n代理地址：${$storage.getApiUrl()}`) : $utils.setTitle('启用WHISTLE代理：否');
+                hasEnableWhistleProxy ? $utils.setTitle(`${chrome.i18n.getMessage('enableTipBackground')}${$storage.getApiUrl()}`) : $utils.setTitle(chrome.i18n.getMessage('disableTipBackground'));
                 chrome.browserAction.setIcon({
                     path: hasEnableWhistleProxy ? 'icon.png' : 'icon_disabled.png'
                 });
@@ -123,7 +123,7 @@ window.$proxy = {
 window.$utils = {
     setTitle(title) {
         chrome.browserAction.setTitle({
-            title: `Whistle 规则管理\n=======================\n${title}`
+            title: `${chrome.i18n.getMessage('titleBackground')}${title}`
         });
     }
 };

@@ -1,0 +1,58 @@
+{
+  "extName": {
+    "message": "whistle 第三方插件",
+    "description": "标题"
+  },
+  "extDescription": {
+    "message": "whistle 代理规则管理非官方插件",
+    "description": "描述"
+  },
+  "loading": {
+    "message": "规则加载中...",
+    "description": "加载中"
+  },
+  "tipFailed": {
+    "message": "加载失败，请确认whistle已经启动且下面的地址是正确的（若不正确，输入正确的地址）",
+    "description": "规则加载失败提示"
+  },
+  "btnSave": {
+    "message": "保存并重新加载",
+    "description": "保存按钮"
+  },
+  "title1": {
+    "message": "WHISTLE规则管理",
+    "description": "页面小标题"
+  },
+  "title2": {
+    "message": "WHISTLE代理信息",
+    "description": "页面小标题"
+  },
+  "titleBackground": {
+    "message": "Whistle 规则管理\n=======================\n",
+    "description": "图标显示标题"
+  },
+  "titleAction": {
+    "message": "Whistle 规则管理",
+    "description": "图标显示标题"
+  },
+  "defaultRule": {
+    "message": "默认规则",
+    "description": "默认规则"
+  },
+  "enable": {
+    "message": "启用",
+    "description": "启用"
+  },
+  "moreSettings": {
+    "message": "更多设置",
+    "description": "更多设置"
+  },
+  "enableTipBackground": {
+    "message": "是否启用WHISTLE代理：是\n代理地址：",
+    "description": ""
+  },
+  "disableTipBackground": {
+    "message": "是否启用WHISTLE代理：否",
+    "description": ""
+  }
+}
