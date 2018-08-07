@@ -131,5 +131,11 @@ window.$utils = {
     if (!$storage.getApiUrl()) {
         $storage.setApiUrl('http://127.0.0.1:8899/');
     }
-    $proxy.get();
+    $http.get(`${$storage.getApiUrl().replace(/\/$/, '')}/cgi-bin/init?_=${new Date().getTime()}`).then(_ => {
+        $proxy.get();
+    }).catch(_ => {
+        $proxy.disable().finally(_ => {
+            $proxy.get();
+        });
+    });
 })();
