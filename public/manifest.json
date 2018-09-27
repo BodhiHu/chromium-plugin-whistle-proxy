@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "1.8",
+  "version": "2.0",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "icons": {
@@ -20,7 +20,6 @@
   "default_locale": "en",
   "permissions": [
     "proxy",
-    "storage",
-    "tabs"
+    "storage"
   ]
 }

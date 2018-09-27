@@ -213,7 +213,7 @@
     body {
         padding: 0;
         margin: 0;
-        width: 320px;
+        width: 290px;
         font: 12px/1.5 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
     }
 
