@@ -68,6 +68,15 @@ window.$storage = {
     },
     removeApiUrl() {
         localStorage.removeItem('whistle-api-url');
+    },
+    set(key, name) {
+        localStorage.setItem(key, name);
+    },
+    get(key) {
+        return localStorage.getItem(key) || '';
+    },
+    remove(key) {
+        localStorage.removeItem(key);
     }
 };
 

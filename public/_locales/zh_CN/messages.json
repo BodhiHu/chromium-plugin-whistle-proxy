@@ -20,11 +20,11 @@
     "description": "保存按钮"
   },
   "title1": {
-    "message": "Whistle 规则管理",
+    "message": "规则管理",
     "description": "页面小标题"
   },
   "title2": {
-    "message": "Whistle 代理信息",
+    "message": "代理信息",
     "description": "页面小标题"
   },
   "titleBackground": {
@@ -42,6 +42,26 @@
   "enable": {
     "message": "启用",
     "description": "启用"
+  },
+  "multiple": {
+    "message": "多规则",
+    "description": "多规则"
+  },
+  "refresh": {
+    "message": "刷新",
+    "description": "多规则"
+  },
+  "tip_enable": {
+    "message": "浏览器启用代理",
+    "description": "提示"
+  },
+  "tip_multiple": {
+    "message": "支持多规则",
+    "description": "提示"
+  },
+  "tip_refresh": {
+    "message": "自动刷新页面",
+    "description": "提示"
   },
   "moreSettings": {
     "message": "更多设置",

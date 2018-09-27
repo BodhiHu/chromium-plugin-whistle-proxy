@@ -13,60 +13,79 @@
             </div>
         </el-card>
         <div v-if="rules">
-            <el-card shadow="never">
-                <div slot="header"><span>{{messages.title1}}</span></div>
-                <div class="list">
-                    <div class="item" :class="{active: defaultEnabled}">
+            <div class="box">
+                <div class="title"><span>{{messages.title1}}</span></div>
+                <div class="content list">
+                    <div class="item">
                         <div class="operation">
-                            <el-switch v-model="defaultEnabled" @change="changeDefault"></el-switch>
+                            <v-switch v-model="defaultEnabled" @change="changeDefault"></v-switch>
                         </div>
                         <div class="name">{{messages.defaultRule}}</div>
                     </div>
-                    <div class="item" v-for="(item, index) in rules" :key="index" :class="{active: item.selected}">
+                    <div class="item" v-for="(item, index) in rules" :key="index">
                         <div class="operation">
-                            <el-switch v-model="item.selected" @change="change(item)"></el-switch>
+                            <v-switch v-model="item.selected" @change="change(item)"></v-switch>
                         </div>
                         <div class="name">{{item.name}}</div>
                     </div>
                 </div>
-            </el-card>
-            <el-card shadow="never">
-                <div slot="header"><span>{{messages.title2}}</span></div>
+            </div>
+            <div class="box">
+                <div class="title"><span>{{messages.title2}}</span></div>
                 <div class="content">
-                    <el-form label-width="50px" size="mini">
+                    <el-form label-width="80px" size="mini">
                         <el-form-item :label="messages.enable">
-                            <el-switch v-model="proxyEnabled" @change="setProxyStatus"></el-switch>
+                            <v-switch v-model="proxyEnabled" @change="setProxyStatus"></v-switch>
+                            <span class="help-inline">{{messages.tip_enable}}</span>
+                        </el-form-item>
+                        <el-form-item :label="messages.multiple">
+                            <v-switch v-model="allowMultipleChoice" @change="setAllowMultipleChoice"></v-switch>
+                            <span class="help-inline">{{messages.tip_multiple}}</span>
+                        </el-form-item>
+                        <el-form-item :label="messages.refresh">
+                            <v-switch v-model="autoRefresh" @change="setAutoRefresh"></v-switch>
+                            <span class="help-inline">{{messages.tip_refresh}}</span>
                         </el-form-item>
                         <el-form-item label="Port">{{server.port}}</el-form-item>
                         <el-form-item label="IPv4">
-                            <div v-html="server.ipv4.join('</br>')"></div>
+                            <v-more-details :items="server.ipv4"></v-more-details>
                         </el-form-item>
                         <el-form-item label="IPv6">
-                            <div v-html="server.ipv6.join('</br>')"></div>
+                            <v-more-details :items="server.ipv6"></v-more-details>
                         </el-form-item>
                     </el-form>
                 </div>
-            </el-card>
-            <el-card>
-                <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">{{messages.moreSettings}} <i class="el-icon-d-arrow-right"></i></a>
-            </el-card>
+            </div>
+            <div class="box more-settings">
+                <div class="content">
+                    <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">{{messages.moreSettings}} <i class="el-icon-d-arrow-right"></i></a>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 <script>
+
+    import VMoreDetails from "./components/v-more-details";
+    import VSwitch from "./components/v-switch";
     const $http = chrome.extension.getBackgroundPage().$http;
     const $storage = chrome.extension.getBackgroundPage().$storage;
     const $proxy = chrome.extension.getBackgroundPage().$proxy;
     const $i18n = chrome.i18n.getMessage;
+    const tabs = chrome.tabs;
 
     export default {
         name: 'app',
+        components: {VSwitch, VMoreDetails},
         data() {
             return {
+                activeNames: ['1', '2'],
                 apiUrl: $storage.getApiUrl(),
+                autoRefresh: $storage.get('auto-refresh') === 'true',
                 server: {},
                 proxyEnabled: false,
                 defaultEnabled: false,
+                allowMultipleChoice: false,
                 defaultRules: '',
                 lastRowId: '',
                 hasInit: false,
@@ -80,6 +99,11 @@
                     title2: $i18n('title2'),
                     defaultRule: $i18n('defaultRule'),
                     enable: $i18n('enable'),
+                    multiple: $i18n('multiple'),
+                    refresh: $i18n('refresh'),
+                    tip_enable: $i18n('tip_enable'),
+                    tip_multiple: $i18n('tip_multiple'),
+                    tip_refresh: $i18n('tip_refresh'),
                     moreSettings: $i18n('moreSettings')
                 }
             };
@@ -97,6 +121,7 @@
                     this.lastRowId = res.lastDataId;
                     this.rules = res.rules.list;
                     this.defaultEnabled = !res.rules.defaultRulesIsDisabled;
+                    this.allowMultipleChoice = res.rules.allowMultipleChoice;
                     this.defaultRules = res.rules.defaultRules;
                     this.server = res.server;
                     return true;
@@ -131,9 +156,11 @@
                     changed: false
                 });
                 this.init();
+                this.handleChange();
             },
             change(item) {
                 this.setEnable(item, item.selected);
+                this.handleChange();
             },
             async changeDefault(value) {
                 let url = value ? `${this.url}/cgi-bin/rules/enable-default` : `${this.url}/cgi-bin/rules/disable-default`;
@@ -149,6 +176,7 @@
                     icon: 'checkbox'
                 });
                 this.init();
+                this.handleChange();
             },
             async getProxyStatus() {
                 this.proxyEnabled = await $proxy.get();
@@ -156,6 +184,23 @@
             async setProxyStatus(value) {
                 value ? await $proxy.enable() : await $proxy.disable();
                 await this.getProxyStatus();
+                this.handleChange();
+            },
+            setAutoRefresh() {
+                $storage.set('auto-refresh', this.autoRefresh);
+            },
+            async setAllowMultipleChoice(value) {
+                let url = `${this.url}/cgi-bin/rules/allow-multiple-choice`;
+                await $http.post(url, {
+                    clientId: this.clientId,
+                    allowMultipleChoice: value ? 1 : 0
+                });
+                this.init();
+            },
+            handleChange() {
+                if (this.autoRefresh) {
+                    tabs.reload();
+                }
             }
         },
         mounted() {
@@ -168,34 +213,30 @@
     body {
         padding: 0;
         margin: 0;
-        width: 260px;
+        width: 320px;
         font: 12px/1.5 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
     }
 
     #app {
         background: #ffffff;
+        max-height: 600px;
+        overflow: auto;
     }
 
-    .el-card__header {
-        padding: 5px 10px;
-        font-size: 14px;
-        font-weight: bold;
-    }
-
-    .el-card__body {
-        padding: 10px;
-    }
-
-    .el-card {
-        border: none;
-        border-bottom: 1px solid #ebeef5;
-        &:last-child {
-            border: none;
+    .box {
+        border: 1px solid #ebeef5;
+        color: #606267;
+        margin-top: -1px;
+        .el-form * {
+            font-size: 12px !important;
         }
     }
 
-    .el-form-item--mini {
-        margin-bottom: 5px !important;
+    .title {
+        padding: 0 10px;
+        line-height: 35px;
+        font-size: 14px;
+        border-bottom: 1px solid #ebeef5;
     }
 
     .failed {
@@ -205,6 +246,10 @@
         .input {
             margin-bottom: 10px;
         }
+    }
+
+    .content {
+        padding: 5px 15px;
     }
 
     .list {
@@ -222,10 +267,31 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
-            &.active .name {
-                font-weight: bold;
-                color: #409eff;
-            }
+        }
+    }
+
+    .help-inline {
+        margin-left: 5px;
+        color: #aaaaaa;
+    }
+
+    .el-collapse-item__content {
+        padding-bottom: 10px;
+    }
+
+    .el-collapse-item:last-child .el-collapse-item__wrap {
+        border-bottom: none;
+    }
+
+    .el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
+        margin-bottom: 5px;
+    }
+
+    .el-collapse-item__header {
+        height: 35px;
+        line-height: 35px;
+        .el-collapse-item__arrow {
+            line-height: 35px;
         }
     }
 </style>

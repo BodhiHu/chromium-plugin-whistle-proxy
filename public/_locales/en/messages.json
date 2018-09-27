@@ -20,11 +20,11 @@
     "description": "保存按钮"
   },
   "title1": {
-    "message": "Whistle Rules Management",
+    "message": "Rules Management",
     "description": "页面小标题"
   },
   "title2": {
-    "message": "Whistle Proxy Information",
+    "message": "Proxy Information",
     "description": "页面小标题"
   },
   "titleBackground": {
@@ -42,6 +42,26 @@
   "enable": {
     "message": "Enable",
     "description": "启用"
+  },
+  "multiple": {
+    "message": "Multiple",
+    "description": "多规则"
+  },
+  "refresh": {
+    "message": "Refresh",
+    "description": "多规则"
+  },
+  "tip_enable": {
+    "message": "Enable chrome proxy?",
+    "description": "提示"
+  },
+  "tip_multiple": {
+    "message": "Support multiple rules?",
+    "description": "提示"
+  },
+  "tip_refresh": {
+    "message": "Auto refresh page?",
+    "description": "提示"
   },
   "moreSettings": {
     "message": "More Settings",
