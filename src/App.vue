@@ -1,5 +1,19 @@
 <template>
     <div id="app">
+        <transition name="fade">
+            <div class="loading" v-show="loading">
+                <svg width="60px" height="60px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"
+                     preserveAspectRatio="xMidYMid" class="lds-infinity" style="background: none;">
+                    <path fill="none" ng-attr-stroke="{{config.stroke}}" ng-attr-stroke-width="{{config.width}}"
+                          ng-attr-stroke-dasharray="{{config.dasharray}}"
+                          d="M24.3,30C11.4,30,5,43.3,5,50s6.4,20,19.3,20c19.3,0,32.1-40,51.4-40 C88.6,30,95,43.3,95,50s-6.4,20-19.3,20C56.4,70,43.6,30,24.3,30z"
+                          stroke="#409eff" stroke-width="5" stroke-dasharray="153.95335693359377 102.63557128906248">
+                        <animate attributeName="stroke-dashoffset" calcMode="linear" values="0;256.58892822265625"
+                                 keyTimes="0;1" dur="1.5" begin="0s" repeatCount="indefinite"></animate>
+                    </path>
+                </svg>
+            </div>
+        </transition>
         <el-card v-if="!hasInit">
             {{messages.loading}}
         </el-card>
@@ -9,7 +23,9 @@
                 <el-input v-model="apiUrl" size="mini"></el-input>
             </div>
             <div class="btns">
-                <el-button size="mini" type="primary" icon="el-icon-refresh" @click.stop.prevent="reload">{{messages.btnSave}}</el-button>
+                <el-button size="mini" type="primary" icon="el-icon-refresh" @click.stop.prevent="reload">
+                    {{messages.btnSave}}
+                </el-button>
             </div>
         </el-card>
         <div v-if="rules">
@@ -18,13 +34,13 @@
                 <div class="content list">
                     <div class="item">
                         <div class="operation">
-                            <v-switch v-model="defaultEnabled" @change="changeDefault"></v-switch>
+                            <el-switch v-model="defaultEnabled" @change="changeDefault"></el-switch>
                         </div>
                         <div class="name">{{messages.defaultRule}}</div>
                     </div>
                     <div class="item" v-for="(item, index) in rules" :key="index">
                         <div class="operation">
-                            <v-switch v-model="item.selected" @change="change(item)"></v-switch>
+                            <el-switch v-model="item.selected" @change="change(item)"></el-switch>
                         </div>
                         <div class="name">{{item.name}}</div>
                     </div>
@@ -35,15 +51,15 @@
                 <div class="content">
                     <el-form label-width="80px" size="mini">
                         <el-form-item :label="messages.enable">
-                            <v-switch v-model="proxyEnabled" @change="setProxyStatus"></v-switch>
+                            <el-switch v-model="proxyEnabled" @change="setProxyStatus"></el-switch>
                             <span class="help-inline">{{messages.tip_enable}}</span>
                         </el-form-item>
                         <el-form-item :label="messages.multiple">
-                            <v-switch v-model="allowMultipleChoice" @change="setAllowMultipleChoice"></v-switch>
+                            <el-switch v-model="allowMultipleChoice" @change="setAllowMultipleChoice"></el-switch>
                             <span class="help-inline">{{messages.tip_multiple}}</span>
                         </el-form-item>
                         <el-form-item :label="messages.refresh">
-                            <v-switch v-model="autoRefresh" @change="setAutoRefresh"></v-switch>
+                            <el-switch v-model="autoRefresh" @change="setAutoRefresh"></el-switch>
                             <span class="help-inline">{{messages.tip_refresh}}</span>
                         </el-form-item>
                         <el-form-item label="Port">{{server.port}}</el-form-item>
@@ -58,7 +74,8 @@
             </div>
             <div class="box more-settings">
                 <div class="content">
-                    <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">{{messages.moreSettings}} <i class="el-icon-d-arrow-right"></i></a>
+                    <a v-bind:href="apiUrl" target="_blank" style="color: #409EFF; text-decoration: none">{{messages.moreSettings}}
+                        <i class="el-icon-d-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -67,7 +84,7 @@
 <script>
 
     import VMoreDetails from "./components/v-more-details";
-    import VSwitch from "./components/v-switch";
+
     const $http = chrome.extension.getBackgroundPage().$http;
     const $storage = chrome.extension.getBackgroundPage().$storage;
     const $proxy = chrome.extension.getBackgroundPage().$proxy;
@@ -76,9 +93,10 @@
 
     export default {
         name: 'app',
-        components: {VSwitch, VMoreDetails},
+        components: {VMoreDetails},
         data() {
             return {
+                loading: false,
                 activeNames: ['1', '2'],
                 apiUrl: $storage.getApiUrl(),
                 autoRefresh: $storage.get('auto-refresh') === 'true',
@@ -188,6 +206,7 @@
             },
             setAutoRefresh() {
                 $storage.set('auto-refresh', this.autoRefresh);
+                this.fixRerender();
             },
             async setAllowMultipleChoice(value) {
                 let url = `${this.url}/cgi-bin/rules/allow-multiple-choice`;
@@ -196,11 +215,18 @@
                     allowMultipleChoice: value ? 1 : 0
                 });
                 this.init();
+                this.fixRerender();
             },
             handleChange() {
+                this.fixRerender();
                 if (this.autoRefresh) {
                     tabs.reload();
                 }
+            },
+            async fixRerender() {
+                this.loading = true;
+                await this.$nextTick();
+                this.loading = false;
             }
         },
         mounted() {
@@ -223,10 +249,35 @@
         overflow: auto;
     }
 
+    .loading {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        background-image: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+
+        svg {
+            width: 60px;
+            height: 60px;
+        }
+    }
+
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity .3s;
+    }
+
+    .fade-enter, .fade-leave-to {
+        opacity: 0;
+    }
+
     .box {
         border: 1px solid #ebeef5;
         color: #606267;
         margin-top: -1px;
+
         .el-form * {
             font-size: 12px !important;
         }
@@ -243,6 +294,7 @@
         .tips {
             margin-bottom: 10px;
         }
+
         .input {
             margin-bottom: 10px;
         }
@@ -257,10 +309,12 @@
             height: 20px;
             line-height: 20px;
             margin: 5px 0;
+
             .operation {
                 float: right;
                 width: 40px;
             }
+
             .name {
                 margin-right: 50px;
                 overflow: hidden;
@@ -290,6 +344,7 @@
     .el-collapse-item__header {
         height: 35px;
         line-height: 35px;
+
         .el-collapse-item__arrow {
             line-height: 35px;
         }
