@@ -20,11 +20,11 @@
     "description": "保存按钮"
   },
   "title1": {
-    "message": "Rules Management",
+    "message": "Rules",
     "description": "页面小标题"
   },
   "title2": {
-    "message": "Proxy Information & Settings",
+    "message": "Info & Settings",
     "description": "页面小标题"
   },
   "titleBackground": {
@@ -40,7 +40,7 @@
     "description": "默认规则"
   },
   "enable": {
-    "message": "Enable",
+    "message": "Proxy Status",
     "description": "启用"
   },
   "multiple": {

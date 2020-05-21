@@ -40,8 +40,8 @@
     "description": "默认规则"
   },
   "enable": {
-    "message": "启用",
-    "description": "启用"
+    "message": "代理状态",
+    "description": "代理状态"
   },
   "multiple": {
     "message": "多规则",
@@ -52,7 +52,7 @@
     "description": "多规则"
   },
   "tip_enable": {
-    "message": "浏览器启用代理",
+    "message": "浏览器是否启用代理",
     "description": "提示"
   },
   "tip_multiple": {

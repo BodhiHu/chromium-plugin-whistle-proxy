@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "watch": "vue-cli-service build --mode production --target app --watch"
   },
   "dependencies": {
+    "clipboard": "^2.0.6",
     "element-ui": "^2.4.4",
     "vue": "^2.5.16"
   },
