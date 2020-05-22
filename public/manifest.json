@@ -23,16 +23,5 @@
     "storage",
     "http://*/",
     "https://*/"
-  ],
-  "content_scripts": [
-    {
-      "matches": [
-        "https://*.jd.com/*",
-        "https://*.jd.hk/*"
-      ],
-      "js": [
-        "contentScript.js"
-      ]
-    }
   ]
 }
