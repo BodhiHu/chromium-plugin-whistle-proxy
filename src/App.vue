@@ -85,9 +85,7 @@
 
     import Clipboard from 'clipboard';
 
-    const $http = chrome.extension.getBackgroundPage().$http;
-    const $storage = chrome.extension.getBackgroundPage().$storage;
-    const $proxy = chrome.extension.getBackgroundPage().$proxy;
+    const {$http, $storage, $proxy} = chrome.extension.getBackgroundPage();
     const $i18n = chrome.i18n.getMessage;
     const tabs = chrome.tabs;
 
