@@ -19,7 +19,6 @@
   },
   "default_locale": "zh_CN",
   "permissions": [
-    "proxy",
-    "storage"
+    "proxy"
   ]
 }
